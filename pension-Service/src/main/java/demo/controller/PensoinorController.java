@@ -19,19 +19,41 @@ public class PensoinorController
 	@Autowired
 	private PensionorService service;
 	
-	@PostMapping("/save")
-	public PensionResponse savePensionor(@RequestBody PensionRequest request)
-	{
-		System.out.println("Save pensionor");
-		if(request.getPensionor().getName().isBlank()) {
-			throw new IllegalArgumentException("Wrong input");
-		}
-		return service.savePensionor(request);
+	
+
+	@PostMapping(value = "/create")
+	public Result create(@Valid @RequestBody PensionerDetails pensionerDetails) {
+		return service.savePensioner(pensionerDetails);
 	}
-	@GetMapping("/{aadhaarNumber}")
-	public ResponseBody checkGetMapping(@RequestBody int aadhaarNumber) {
-		System.out.println("");
-		
-		return service.getPensionorDetails(aadhaarNumber);
+
+	@GetMapping
+	public List<PensionerDetails> getPensioners() {
+		return service.getPensioners();
+	}
+
+	@GetMapping({ "/{id}" })
+	public ResponseEntity<PensionerDetails> getPensionersById(@PathVariable String id) {
+		Optional<PensionerDetails> user = service.getById(id);
+		return generateResponse(user);
+	}
+
+	@ExceptionHandler(EmptyResultDataAccessException.class)
+	@ResponseStatus(code = HttpStatus.NOT_FOUND)
+	public void handleNonExistantUser() {
+
+	}
+
+	@DeleteMapping({ "/{id}" })
+	public Result deletePensionersById(@PathVariable String id) {
+		return service.deleteById(id);
+	}
+
+	@DeleteMapping({ "/deleteAll" })
+	public Result deleteAll() {
+		return service.deleteAllPensioners();
+	}
+
+	private ResponseEntity<PensionerDetails> generateResponse(Optional<PensionerDetails> user) {
+		return user.isPresent() ? new ResponseEntity<>(HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 }
