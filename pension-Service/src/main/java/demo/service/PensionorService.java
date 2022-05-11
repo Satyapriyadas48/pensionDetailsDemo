@@ -18,29 +18,30 @@ public class PensionorService {
 	@Autowired
 	private RestTemplate template;
 
-	public PensionResponse savePensionor(PensionRequest request) {
-		String response = "";
-		Pensionor pensionor = request.getPensionor();
-
-
-		//client-side load balancing
-//	Payment paymentResponse = template.postForObject("http://PAYMENT-SERVICE/payment/doPayment", payment,
-//				Payment.class);
-//
-//		response = paymentResponse.getPaymentStatus().equals("success") ? "payment processing successful"
-//				: "there is a failure";
-
-		repository.save(pensionor);
-
-//		return new TransactionResponse(order, paymentResponse.getAmount(), paymentResponse.getTransactionId(),
-//				response);
-		return new PensionResponse();
+	@Transactional(rollbackOn = Exception.class)
+	public Result savePensioner(PensionerDetails pensionerDetails) {
+		repository.save(pensionerDetails);
+		return new Result(200, ErrorMessages.SAVE_SUCCESSFUL);
 	}
 
-	public ResponseBody getPensionorDetails(int aadhaarNumber) {
-		
-		return (ResponseBody) repository.getById(aadhaarNumber);
+	public List<PensionerDetails> getPensioners() {
+		return repository.findAll();
 	}
+
+	public Optional<PensionerDetails> getById(String id) {
+		return repository.findById(id);
+	}
+
+	public Result deleteById(String id) {
+		repository.deleteById(id);
+		return new Result(200, ErrorMessages.DELETE_SUCCESSFUL);
+	}
+
+	public Result deleteAllPensioners() {
+		repository.deleteAll();
+		return new Result(200, ErrorMessages.DELETE_SUCCESSFUL);
+	}
+
 
 	
 }
